@@ -6,6 +6,7 @@ Test Setup       Reset Simulator
 
 
 *** Test Cases ***
-Attach to UE
+TC01 Attach UE successfully
     [Documentation]    Docs
-    Reset Simulator
+    Attach UE-1
+    Verify UE-1 Attached Successfully

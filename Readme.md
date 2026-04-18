@@ -1,7 +1,7 @@
 # TESTOWANIE OPROGRAMOWANIA
 
 ## Setup
-```
+```commandline
 mkdir .venv
 python3 -m venv .venv
 

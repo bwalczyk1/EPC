@@ -1,7 +1,7 @@
 # TODO LIST
 
 ## bwalczyk
-- [ ] 1
+- [x] 1
 - [ ] 5
 
 ## nszyszka

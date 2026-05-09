@@ -22,3 +22,18 @@ TC03 Attach already attached UE
 TC04 Verify default bearer after attach
     Attach UE-1
     Verify UE-1 Has Default Bearer
+
+# TC05 Stop traffic on specific bearer
+#     Attach UE-1
+#     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
+#     Stop Traffic UE-1 Bearer-9
+#     Verify Traffic Stopped UE-1 Bearer-9
+
+# TC06 Stop all traffic for UE
+#     Attach UE-1
+#     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
+#     Stop All Traffic UE-1
+
+TC07 Stop traffic on non-existent bearer
+    Attach UE-1
+    Stop Traffic UE-1 Bearer-3 Should Fail With Bearer Not Found

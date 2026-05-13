@@ -95,3 +95,33 @@ Stop Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  Bearer not found
+
+
+# --- Task 6: Add bearer to UE ---
+
+Add Bearer-${bearer_id} To UE-${ue_id}
+    ${id}=        Convert To Integer  ${bearer_id}
+    ${body}=      Create Dictionary   bearer_id=${id}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${ADD_BEARER_RESPONSE}    ${response.json()}
+
+Verify UE-${ue_id} Has Bearer-${bearer_id}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}
+    Status Should Be  200  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Key  ${data}[bearers]  ${bearer_id}
+
+Add Bearer-${bearer_id} To UE-${ue_id} Should Fail With Out Of Range
+    ${id}=        Convert To Integer  ${bearer_id}
+    ${body}=      Create Dictionary   bearer_id=${id}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Add Bearer-${bearer_id} To UE-${ue_id} Should Fail With Already Added
+    ${id}=        Convert To Integer  ${bearer_id}
+    ${body}=      Create Dictionary   bearer_id=${id}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Bearer already exists

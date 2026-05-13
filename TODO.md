@@ -5,8 +5,8 @@
 - [...] 5 -> waiting on 3 (ptrojan)
 
 ## nszyszka
-- [ ] 2
-- [ ] 6
+- [x] 2
+- [x] 6
 
 ## ptrojan
 - [ ] 3

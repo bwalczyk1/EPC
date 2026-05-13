@@ -45,3 +45,18 @@ TC06 Detach not attached UE
 TC09 Stop traffic on non-existent bearer
     Attach UE-1
     Stop Traffic UE-1 Bearer-3 Should Fail With Bearer Not Found
+
+TC10 Add bearer successfully
+    Attach UE-1
+    Add Bearer-1 To UE-1
+    Verify UE-1 Has Bearer-1
+
+TC11 Add bearer out of range
+    Attach UE-1
+    Add Bearer-0 To UE-1 Should Fail With Out Of Range
+    Add Bearer-10 To UE-1 Should Fail With Out Of Range
+
+TC12 Add already existing bearer
+    Attach UE-1
+    Add Bearer-1 To UE-1
+    Add Bearer-1 To UE-1 Should Fail With Already Added

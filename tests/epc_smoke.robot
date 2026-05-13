@@ -23,17 +23,25 @@ TC04 Verify default bearer after attach
     Attach UE-1
     Verify UE-1 Has Default Bearer
 
-# TC05 Stop traffic on specific bearer
+TC05 Detach UE successfully
+    Attach UE-1
+    Detach UE-1
+    Verify UE-1 Detached Successfully
+
+TC06 Detach not attached UE
+    Detach UE-1 Should Fail With UE Not Found
+
+# TC07 Stop traffic on specific bearer
 #     Attach UE-1
 #     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
 #     Stop Traffic UE-1 Bearer-9
 #     Verify Traffic Stopped UE-1 Bearer-9
 
-# TC06 Stop all traffic for UE
+# TC08 Stop all traffic for UE
 #     Attach UE-1
 #     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
 #     Stop All Traffic UE-1
 
-TC07 Stop traffic on non-existent bearer
+TC09 Stop traffic on non-existent bearer
     Attach UE-1
     Stop Traffic UE-1 Bearer-3 Should Fail With Bearer Not Found

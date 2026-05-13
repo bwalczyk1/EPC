@@ -51,6 +51,24 @@ Verify UE-${ue_id} Has Default Bearer
     Dictionary Should Contain Key  ${data}[bearers]  9
 
 
+# --- Task 2: Detach UE ---
+
+Detach UE-${ue_id}
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${DETACH_RESPONSE}    ${response.json()}
+
+Verify UE-${ue_id} Detached Successfully
+    Should Be Equal As Integers  ${DETACH_RESPONSE}[ue_id]  ${ue_id}
+    Should Be Equal              ${DETACH_RESPONSE}[status]  detached
+
+Detach UE-${ue_id} Should Fail With UE Not Found
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  UE not found
+
+
 # --- Task 5: Stop data transfer ---
 
 Stop Traffic UE-${ue_id} Bearer-${bearer_id}

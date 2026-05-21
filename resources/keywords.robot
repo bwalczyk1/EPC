@@ -69,6 +69,35 @@ Detach UE-${ue_id} Should Fail With UE Not Found
     Dictionary Should Contain Item  ${data}  detail  UE not found
 
 
+# --- Task 3: Start data transfer ---
+
+Start Traffic UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps}
+    ${speed}=     Convert To Integer  ${speed_kbps}
+    ${body}=      Create Dictionary   direction=DL  speed_kbps=${speed}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${START_TRAFFIC_RESPONSE}    ${response.json()}
+
+Verify Traffic Started UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps}
+    Should Be Equal              ${START_TRAFFIC_RESPONSE}[status]      traffic_started
+    Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[ue_id]       ${ue_id}
+    Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[bearer_id]   ${bearer_id}
+    Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[speed_kbps]  ${speed_kbps}
+
+Start Traffic UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps} Should Fail With Out Of Range
+    ${speed}=     Convert To Integer  ${speed_kbps}
+    ${body}=      Create Dictionary   direction=DL  speed_kbps=${speed}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Start Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
+    ${body}=      Create Dictionary   direction=DL  speed_kbps=${1000}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Bearer not found
+
+
 # --- Task 5: Stop data transfer ---
 
 Stop Traffic UE-${ue_id} Bearer-${bearer_id}
@@ -125,3 +154,21 @@ Add Bearer-${bearer_id} To UE-${ue_id} Should Fail With Already Added
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  Bearer already exists
+
+
+# --- Task 7: Check connected bearers ---
+
+Get Connected Bearers For UE-${ue_id}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}
+    Status Should Be  200  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Set Test Variable    ${CONNECTED_BEARERS}    ${data}[bearers]
+
+Verify Connected Bearers Contain Bearer-${bearer_id}
+    Dictionary Should Contain Key  ${CONNECTED_BEARERS}  ${bearer_id}
+
+Get Connected Bearers For UE-${ue_id} Should Fail With UE Not Found
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  UE not found

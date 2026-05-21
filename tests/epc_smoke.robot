@@ -60,3 +60,25 @@ TC12 Add already existing bearer
     Attach UE-1
     Add Bearer-1 To UE-1
     Add Bearer-1 To UE-1 Should Fail With Already Added
+
+TC13 Start traffic successfully
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-1000
+    Verify Traffic Started UE-1 Bearer-9 Speed-1000
+
+TC14 Start traffic with out of range speed
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-0 Should Fail With Out Of Range
+    Start Traffic UE-1 Bearer-9 Speed-100001 Should Fail With Out Of Range
+
+TC15 Start traffic on non-existent bearer
+    Attach UE-1
+    Start Traffic UE-1 Bearer-3 Should Fail With Bearer Not Found
+
+TC16 Get connected bearers successfully
+    Attach UE-1
+    Get Connected Bearers For UE-1
+    Verify Connected Bearers Contain Bearer-9
+
+TC17 Get connected bearers for non-existent UE
+    Get Connected Bearers For UE-1 Should Fail With UE Not Found

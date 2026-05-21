@@ -73,25 +73,26 @@ Detach UE-${ue_id} Should Fail With UE Not Found
 
 Start Traffic UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps}
     ${speed}=     Convert To Integer  ${speed_kbps}
-    ${body}=      Create Dictionary   direction=DL  speed_kbps=${speed}
+    ${body}=      Create Dictionary   protocol=tcp  kbps=${speed}
     ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}
     Status Should Be  200  ${response}
     Set Test Variable    ${START_TRAFFIC_RESPONSE}    ${response.json()}
 
 Verify Traffic Started UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps}
+    ${target_bps}=    Evaluate    ${speed_kbps} * 1000
     Should Be Equal              ${START_TRAFFIC_RESPONSE}[status]      traffic_started
     Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[ue_id]       ${ue_id}
     Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[bearer_id]   ${bearer_id}
-    Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[speed_kbps]  ${speed_kbps}
+    Should Be Equal As Integers  ${START_TRAFFIC_RESPONSE}[target_bps]  ${target_bps}
 
 Start Traffic UE-${ue_id} Bearer-${bearer_id} Speed-${speed_kbps} Should Fail With Out Of Range
     ${speed}=     Convert To Integer  ${speed_kbps}
-    ${body}=      Create Dictionary   direction=DL  speed_kbps=${speed}
+    ${body}=      Create Dictionary   protocol=tcp  kbps=${speed}
     ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
-    Status Should Be  422  ${response}
+    Status Should Be  400  ${response}
 
 Start Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
-    ${body}=      Create Dictionary   direction=DL  speed_kbps=${1000}
+    ${body}=      Create Dictionary   protocol=tcp  kbps=${1000}
     ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}

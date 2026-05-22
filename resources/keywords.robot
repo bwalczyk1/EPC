@@ -172,3 +172,123 @@ Get Connected Bearers For UE-${ue_id} Should Fail With UE Not Found
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  UE not found
+
+
+# --- Task 4: Check current transfer ---
+
+Start Traffic For Transfer Check UE-${ue_id} Bearer-${bearer_id} Kbps-${kbps}
+    ${kbps_int}=  Convert To Integer  ${kbps}
+    ${body}=      Create Dictionary   protocol=tcp  kbps=${kbps_int}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}
+    Status Should Be  200  ${response}
+    Sleep  1s
+
+Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic
+    Status Should Be  200  ${response}
+    Set Test Variable    ${BEARER_TRANSFER_STATS}    ${response.json()}
+
+Get Aggregated Transfer Stats For UE-${ue_id}
+    ${params}=    Create Dictionary  ue_id=${ue_id}
+    ${response}=  GET  url=${BASE_URL}/ues/stats  params=${params}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${AGG_TRANSFER_STATS}    ${response.json()}
+
+Get Aggregated Transfer Stats For UE-${ue_id} With Details
+    ${params}=    Create Dictionary  ue_id=${ue_id}  include_details=${True}
+    ${response}=  GET  url=${BASE_URL}/ues/stats  params=${params}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${AGG_TRANSFER_STATS}    ${response.json()}
+
+Get Global Transfer Stats
+    ${response}=  GET  url=${BASE_URL}/ues/stats
+    Status Should Be  200  ${response}
+    Set Test Variable    ${GLOBAL_TRANSFER_STATS}    ${response.json()}
+
+Verify Bearer Transfer Stats Are Zero
+    Should Be Equal As Integers  ${BEARER_TRANSFER_STATS}[tx_bps]  0
+    Should Be Equal As Integers  ${BEARER_TRANSFER_STATS}[rx_bps]  0
+    Should Be Equal              ${BEARER_TRANSFER_STATS}[protocol]  ${None}
+    Should Be Equal As Numbers   ${BEARER_TRANSFER_STATS}[duration]  0
+
+Verify Bearer Transfer Stats Show Active Traffic
+    Should Not Be Equal As Integers  ${BEARER_TRANSFER_STATS}[tx_bps]  0
+    Should Not Be Equal              ${BEARER_TRANSFER_STATS}[protocol]  ${None}
+    Should Be True                   ${BEARER_TRANSFER_STATS}[target_bps] > 0
+
+Verify Bearer Target Speed Is ${kbps} Kbps
+    ${expected_bps}=  Evaluate  int(${kbps}) * 1000
+    Should Be Equal As Integers  ${BEARER_TRANSFER_STATS}[target_bps]  ${expected_bps}
+
+Verify Aggregated Transfer Is Zero
+    Should Be Equal As Integers  ${AGG_TRANSFER_STATS}[bearer_count]  0
+    Should Be Equal As Integers  ${AGG_TRANSFER_STATS}[total_tx_bps]  0
+    Should Be Equal As Integers  ${AGG_TRANSFER_STATS}[total_rx_bps]  0
+
+Verify Aggregated Bearer Count Is ${count}
+    Should Be Equal As Integers  ${AGG_TRANSFER_STATS}[bearer_count]  ${count}
+
+Verify Aggregated Total Throughput Is Non Zero
+    Should Not Be Equal As Integers  ${AGG_TRANSFER_STATS}[total_tx_bps]  0
+    Should Not Be Equal As Integers  ${AGG_TRANSFER_STATS}[total_rx_bps]  0
+
+Verify Aggregated Details Contain Bearer-${bearer_id} For UE-${ue_id}
+    ${details}=      Set Variable  ${AGG_TRANSFER_STATS}[details]
+    ${ue_details}=   Get From Dictionary  ${details}  ${ue_id}
+    Dictionary Should Contain Key  ${ue_details}  ${bearer_id}
+
+Verify Aggregated Total Matches Details Sum For UE-${ue_id}
+    ${details}=      Set Variable  ${AGG_TRANSFER_STATS}[details]
+    ${ue_details}=   Get From Dictionary  ${details}  ${ue_id}
+    ${values}=     Get Dictionary Values  ${ue_details}
+    ${sum}=        Evaluate  sum(${values})
+    ${total}=      Set Variable  ${AGG_TRANSFER_STATS}[total_tx_bps]
+    Should Be True  ${total} >= ${sum}
+
+Verify Global Transfer Stats Show Activity
+    Should Be True  ${GLOBAL_TRANSFER_STATS}[ue_count] >= 1
+    Should Not Be Equal As Integers  ${GLOBAL_TRANSFER_STATS}[total_tx_bps]  0
+
+Get Aggregated Transfer Stats For UE-${ue_id} Should Fail With UE Not Found
+    ${params}=    Create Dictionary  ue_id=${ue_id}
+    ${response}=  GET  url=${BASE_URL}/ues/stats  params=${params}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  UE not found
+
+
+# --- Task 8: Delete bearer from UE ---
+
+Delete Bearer-${bearer_id} From UE-${ue_id}
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${DELETE_BEARER_RESPONSE}    ${response.json()}
+
+Verify Bearer-${bearer_id} Delete Response For UE-${ue_id}
+    Should Be Equal              ${DELETE_BEARER_RESPONSE}[status]     bearer_deleted
+    Should Be Equal As Integers  ${DELETE_BEARER_RESPONSE}[ue_id]      ${ue_id}
+    Should Be Equal As Integers  ${DELETE_BEARER_RESPONSE}[bearer_id]  ${bearer_id}
+
+Verify Bearer-${bearer_id} Deleted From UE-${ue_id}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}
+    Status Should Be  200  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Not Contain Key  ${data}[bearers]  ${bearer_id}
+
+Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With Bearer Not Found
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Bearer not found
+
+Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With Cannot Remove Default Bearer
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Cannot remove default bearer
+
+Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With UE Not Found
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  UE not found

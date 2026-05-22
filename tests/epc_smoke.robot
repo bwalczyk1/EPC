@@ -31,16 +31,16 @@ TC05 Detach UE successfully
 TC06 Detach not attached UE
     Detach UE-1 Should Fail With UE Not Found
 
-# TC07 Stop traffic on specific bearer
-#     Attach UE-1
-#     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
-#     Stop Traffic UE-1 Bearer-9
-#     Verify Traffic Stopped UE-1 Bearer-9
+TC07 Stop traffic on specific bearer
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-1000
+    Stop Traffic UE-1 Bearer-9
+    Verify Traffic Stopped UE-1 Bearer-9
 
-# TC08 Stop all traffic for UE
-#     Attach UE-1
-#     <ptrojan Task 3: Start Traffic UE-1 Bearer-9>
-#     Stop All Traffic UE-1
+TC08 Stop all traffic for UE
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-1000
+    Stop All Traffic UE-1
 
 TC09 Stop traffic on non-existent bearer
     Attach UE-1

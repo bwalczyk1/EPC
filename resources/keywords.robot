@@ -293,3 +293,15 @@ Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With UE Not Found
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  UE not found
+
+Get Traffic Stats UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Bearer not found
+
+Get Traffic Stats UE-${ue_id} Bearer-${bearer_id} With Unit-${unit}
+    ${params}=    Create Dictionary  unit=${unit}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  params=${params}
+    Status Should Be  200  ${response}
+    Set Test Variable    ${TRAFFIC_STATS_RESPONSE}    ${response.json()}

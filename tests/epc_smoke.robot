@@ -66,9 +66,13 @@ TC13 Start traffic successfully
     Start Traffic UE-1 Bearer-9 Speed-1000
     Verify Traffic Started UE-1 Bearer-9 Speed-1000
 
-# TC14 Start traffic with out of range speed
-#     Attach UE-1
-#     Start Traffic UE-1 Bearer-9 Speed-100001 Should Fail With Out Of Range
+# BUG: spec defines max 100 Mbps DL transfer limit, but API accepts any value.
+# StartTrafficRequest schema has no min/max on kbps/Mbps/bps fields and
+# application-level validation is missing. 100001 kbps (100.001 Mbps) returns
+# 200 traffic_started instead of an error.
+TC14 Start traffic with out of range speed
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-100001 Should Fail With Out Of Range
 
 TC15 Start traffic on non-existent bearer
     Attach UE-1
@@ -183,3 +187,35 @@ TC31 Delete bearer twice fails
 TC32 Delete bearer when UE not found
     [Documentation]    Task 8: delete requires attached UE.
     Delete Bearer-1 From UE-1 Should Fail With UE Not Found
+
+# BUG: spec defines UE ID range as 0-100 (inclusive), but API schema enforces min=1.
+# UE ID 0 is rejected with 422 instead of being accepted.
+TC33 UE ID 0 should be valid per spec range 0-100
+    Attach UE-0
+    Verify UE-0 Attached Successfully
+
+# BUG: negative throughput values are not validated. All units (Mbps, kbps, bps)
+# accept negative numbers — e.g. kbps=-1 returns 200 traffic_started with
+# target_bps=-1000. StartTrafficRequest schema has no minimum constraint on
+# throughput fields.
+TC34 Negative speed should be rejected
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed--1 Should Fail With Out Of Range
+
+# BUG: GET /ues/{ue_id}/bearers/{bearer_id}/traffic returns 200 with zero data for
+# a bearer that was never added to the UE. DELETE on the same bearer correctly
+# returns 400 "Bearer not found" — inconsistency within the same endpoint.
+TC35 GET traffic stats for non-existent bearer should return 400 not 200
+    Attach UE-1
+    Get Traffic Stats UE-1 Bearer-5 Should Fail With Bearer Not Found
+
+# BUG: spec requires optional 'unit' parameter for traffic stats
+# ("opcjonalnych bearer ID oraz unit / domyślną jednostką jest kbps").
+# API ignores the parameter entirely — GET with ?unit=kbps still returns
+# raw bps values. For 1000 kbps traffic, target_bps should be 1000 (kbps)
+# but is 1000000 (bps).
+TC36 Traffic stats unit parameter should affect returned values
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-1000
+    Get Traffic Stats UE-1 Bearer-9 With Unit-kbps
+    Should Be Equal As Integers  ${TRAFFIC_STATS_RESPONSE}[target_bps]  ${1000}

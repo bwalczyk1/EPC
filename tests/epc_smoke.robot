@@ -210,7 +210,6 @@ TC35 GET traffic stats for non-existent bearer should return 400 not 200
     Get Traffic Stats UE-1 Bearer-5 Should Fail With Bearer Not Found
 
 # BUG: spec requires optional 'unit' parameter for traffic stats
-# ("opcjonalnych bearer ID oraz unit / domyślną jednostką jest kbps").
 # API ignores the parameter entirely — GET with ?unit=kbps still returns
 # raw bps values. For 1000 kbps traffic, target_bps should be 1000 (kbps)
 # but is 1000000 (bps).

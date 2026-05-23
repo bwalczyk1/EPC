@@ -2,7 +2,7 @@
 
 ## bwalczyk
 - [x] 1
-- [...] 5 -> waiting on 3 (ptrojan)
+- [x] 5
 
 ## nszyszka
 - [x] 2

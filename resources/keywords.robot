@@ -344,3 +344,22 @@ Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id} With Unit-${unit}
 Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With Active Traffic
     ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}  expected_status=any
     Status Should Be  400  ${response}
+Attach UE With Raw ID-${ue_id} Should Fail With Validation Error
+    ${body}=      Create Dictionary  ue_id=${ue_id}
+    ${response}=  POST  ${BASE_URL}/ues  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Add Bearer With Raw ID-${bearer_id} To UE-${ue_id} Should Fail With Validation Error
+    ${body}=      Create Dictionary   bearer_id=${bearer_id}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Detach UE-${ue_id} Should Fail With Active Traffic
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}  expected_status=any
+    Status Should Be  400  ${response}
+
+Verify Bearer-${bearer_id} Active For UE-${ue_id}
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}
+    Status Should Be  200  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Should Be True    ${data}[bearers][${bearer_id}][active]

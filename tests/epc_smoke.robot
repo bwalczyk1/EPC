@@ -258,3 +258,21 @@ TC42 Delete bearer with active traffic rejected
     Add Bearer-1 To UE-1
     Start Traffic UE-1 Bearer-1 Speed-500
     Delete Bearer-1 From UE-1 Should Fail With Active Traffic
+TC43 Attach UE with string ID rejected
+    [Documentation]    BUG-008 - schema says ue_id is integer, but API coerces string "1" to integer.
+    [Tags]    bug
+    Attach UE With Raw ID-1 Should Fail With Validation Error
+
+TC44 Add bearer with string ID rejected
+    [Documentation]    BUG-009 - schema says bearer_id is integer, but API coerces string "1" to integer.
+    [Tags]    bug
+    Attach UE-1
+    Add Bearer With Raw ID-1 To UE-1 Should Fail With Validation Error
+
+TC45 Detach UE with active traffic rejected
+    [Documentation]    BUG-010 - active traffic can be removed implicitly by detaching UE.
+    [Tags]    bug
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-1000
+    Verify Bearer-9 Active For UE-1
+    Detach UE-1 Should Fail With Active Traffic

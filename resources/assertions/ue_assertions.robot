@@ -16,9 +16,6 @@ Verify UE-${ue_id} Has Default Bearer
     Dictionary Should Contain Key  ${data}[bearers]  9
 
 
-# --- Task 2: Detach UE ---
-
-
 Verify UE-${ue_id} Detached Successfully
     Should Be Equal As Integers  ${DETACH_RESPONSE}[ue_id]  ${ue_id}
     Should Be Equal              ${DETACH_RESPONSE}[status]  detached

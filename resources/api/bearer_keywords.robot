@@ -28,9 +28,6 @@ Add Bearer-${bearer_id} To UE-${ue_id} Should Fail With Already Added
     Dictionary Should Contain Item  ${data}  detail  Bearer already exists
 
 
-# --- Task 7: Check connected bearers ---
-
-
 Delete Bearer-${bearer_id} From UE-${ue_id}
     ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}
     Status Should Be  200  ${response}

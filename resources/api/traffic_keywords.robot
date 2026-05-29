@@ -43,9 +43,6 @@ Start Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Traffic Already R
     Dictionary Should Contain Item  ${data}  detail  Traffic already running
 
 
-# --- Task 5: Stop data transfer ---
-
-
 Stop Traffic UE-${ue_id} Bearer-${bearer_id}
     ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic
     Status Should Be  200  ${response}
@@ -80,9 +77,6 @@ Stop Traffic Should Fail With Traffic Not Running
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  Traffic not running
-
-
-# --- Task 6: Add bearer to UE ---
 
 
 Start Traffic For Transfer Check UE-${ue_id} Bearer-${bearer_id} Kbps-${kbps}

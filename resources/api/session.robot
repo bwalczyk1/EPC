@@ -18,6 +18,3 @@ Reset Simulator
     Should Be Equal As Integers    ${response.status_code}    200
     ${data}=    Set Variable    ${response.json()}
     Dictionary Should Contain Item    ${data}    status    reset
-
-
-# --- Task 1: Attach UE ---

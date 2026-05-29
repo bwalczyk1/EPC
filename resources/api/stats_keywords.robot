@@ -52,9 +52,6 @@ Get Aggregated Transfer Stats For UE-${ue_id} Should Fail With UE Not Found
     Dictionary Should Contain Item  ${data}  detail  UE not found
 
 
-# --- Task 8: Delete bearer from UE ---
-
-
 Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id} With Unit-${unit}
     ${params}=    Create Dictionary  unit=${unit}
     ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  params=${params}

@@ -41,9 +41,6 @@ Detach UE-${ue_id} Should Fail With UE Not Found
     Dictionary Should Contain Item  ${data}  detail  UE not found
 
 
-# --- Task 3: Start data transfer ---
-
-
 Get Connected Bearers For UE-${ue_id}
     ${response}=  GET  ${BASE_URL}/ues/${ue_id}
     Status Should Be  200  ${response}
@@ -56,9 +53,6 @@ Get Connected Bearers For UE-${ue_id} Should Fail With UE Not Found
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  UE not found
-
-
-# --- Task 4: Check current transfer ---
 
 
 Attach UE With Raw ID-${ue_id} Should Fail With Validation Error

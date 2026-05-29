@@ -1,4 +1,5 @@
 # EPC Simulator Testing
+Authors: Bartosz Walczyk, Dawid Nabagło, Norbert Szyszka, Patryk Trojan
 
 ## Setup
 ```commandline

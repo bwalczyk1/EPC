@@ -105,18 +105,6 @@ Start Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
     ${data}=      Set Variable  ${response.json()}
     Dictionary Should Contain Item  ${data}  detail  Bearer not found
 
-Start Traffic UE-${ue_id} Bearer-${bearer_id} With Mbps-${mbps} Should Fail With Out Of Range
-    ${speed}=     Convert To Number  ${mbps}
-    ${body}=      Create Dictionary   protocol=tcp  Mbps=${speed}
-    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
-    Status Should Be  400  ${response}
-
-Start Traffic UE-${ue_id} Bearer-${bearer_id} With Bps-${bps} Should Fail With Out Of Range
-    ${speed}=     Convert To Integer  ${bps}
-    ${body}=      Create Dictionary   protocol=tcp  bps=${speed}
-    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
-    Status Should Be  400  ${response}
-
 Start Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Traffic Already Running
     ${body}=      Create Dictionary   protocol=tcp  kbps=${2000}
     ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
@@ -155,6 +143,13 @@ Stop Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
 Stop Traffic UE-${ue_id} Bearer-${bearer_id} Should Fail With No Active Traffic
     ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  expected_status=any
     Status Should Be  400  ${response}
+
+Stop Traffic Should Fail With Traffic Not Running
+    [Arguments]    ${ue_id}    ${bearer_id}
+    ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Traffic not running
 
 
 # --- Task 6: Add bearer to UE ---
@@ -220,6 +215,12 @@ Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id}
     Set Test Variable    ${BEARER_TRANSFER_STATS}    ${response.json()}
 
 Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
+    ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  expected_status=any
+    Status Should Be  400  ${response}
+    ${data}=      Set Variable  ${response.json()}
+    Dictionary Should Contain Item  ${data}  detail  Bearer not found
+
+Get Traffic Stats UE-${ue_id} Bearer-${bearer_id} Should Fail With Bearer Not Found
     ${response}=  GET  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  expected_status=any
     Status Should Be  400  ${response}
     ${data}=      Set Variable  ${response.json()}
@@ -344,14 +345,30 @@ Get Bearer Transfer Stats For UE-${ue_id} Bearer-${bearer_id} With Unit-${unit}
 Delete Bearer-${bearer_id} From UE-${ue_id} Should Fail With Active Traffic
     ${response}=  DELETE  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}  expected_status=any
     Status Should Be  400  ${response}
+
 Attach UE With Raw ID-${ue_id} Should Fail With Validation Error
     ${body}=      Create Dictionary  ue_id=${ue_id}
+    ${response}=  POST  ${BASE_URL}/ues  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Attach UE With Boolean ID Should Fail With Validation Error
+    ${body}=      Create Dictionary  ue_id=${True}
     ${response}=  POST  ${BASE_URL}/ues  json=${body}  expected_status=any
     Status Should Be  422  ${response}
 
 Add Bearer With Raw ID-${bearer_id} To UE-${ue_id} Should Fail With Validation Error
     ${body}=      Create Dictionary   bearer_id=${bearer_id}
     ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Add Bearer With Boolean ID To UE-${ue_id} Should Fail With Validation Error
+    ${body}=      Create Dictionary   bearer_id=${True}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers  json=${body}  expected_status=any
+    Status Should Be  422  ${response}
+
+Start Traffic UE-${ue_id} Bearer-${bearer_id} With Raw Kbps-${kbps} Should Fail With Validation Error
+    ${body}=      Create Dictionary   protocol=tcp  kbps=${kbps}
+    ${response}=  POST  ${BASE_URL}/ues/${ue_id}/bearers/${bearer_id}/traffic  json=${body}  expected_status=any
     Status Should Be  422  ${response}
 
 Detach UE-${ue_id} Should Fail With Active Traffic

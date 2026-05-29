@@ -66,6 +66,7 @@ TC13 Start traffic successfully
     Start Traffic UE-1 Bearer-9 Speed-1000
     Verify Traffic Started UE-1 Bearer-9 Speed-1000
 
+# BUG: API accepts traffic over the documented 100 Mbps limit.
 TC14 Start traffic with out of range speed
     [Documentation]    Spec: max 100 Mbps (100000 kbps). BUG-001 — API accepts 100001 kbps;
     ...    StartTrafficRequest has no max; returns 200 traffic_started instead of 400.
@@ -187,43 +188,36 @@ TC32 Delete bearer when UE not found
     [Documentation]    Task 8: delete requires attached UE.
     Delete Bearer-1 From UE-1 Should Fail With UE Not Found
 
-atttach_to_ue
-    [Documentation]    Minimal attach flow for AI/docs verification (spec task 1 + default bearer 9).
-    Attach UE-1
-    Verify UE-1 Attached Successfully
-    Verify UE-1 Has Default Bearer
-
+# BUG: API rejects UE ID 0 although the documentation allows IDs from 0 to 100.
 TC33 UE ID 0 should be valid per spec range 0-100
     [Documentation]    SPEC-001 — docs allow UE 0-100; API schema enforces min=1 (422 for ue_id 0).
     [Tags]    bug
     Attach UE-0
     Verify UE-0 Attached Successfully
 
+# BUG: API accepts negative kbps and starts traffic with a negative target rate.
 TC34 Start traffic with negative speed rejected
     [Documentation]    BUG-002 — kbps=-1 returns 200 with target_bps=-1000; no minimum on throughput fields.
     [Tags]    bug
     Attach UE-1
     Start Traffic UE-1 Bearer-9 Speed--1 Should Fail With Out Of Range
 
+# BUG: API returns a misleading bearer configuration error for zero throughput.
 TC35 Start traffic with zero speed rejected
     [Documentation]    BUG-004 — kbps=0 returns misleading detail instead of speed out of range.
     [Tags]    bug
     Attach UE-1
     Start Traffic UE-1 Bearer-9 Speed-0 Should Fail With Speed Out Of Range
 
-TC36 Start traffic with Mbps over 100 rejected
-    [Documentation]    BUG-001 — 101 Mbps accepted (same as TC14, different unit).
-    [Tags]    bug
-    Attach UE-1
-    Start Traffic UE-1 Bearer-9 With Mbps-101 Should Fail With Out Of Range
-
-TC37 Get transfer stats for bearer not on UE returns error
+# BUG: API returns traffic stats for a bearer that is not assigned to the UE.
+TC36 Get transfer stats for bearer not on UE returns error
     [Documentation]    BUG-005 — GET returns 200 with zeros; DELETE returns 400 Bearer not found.
     [Tags]    bug
     Attach UE-1
     Get Bearer Transfer Stats For UE-1 Bearer-5 Should Fail With Bearer Not Found
 
-TC38 Traffic stats unit parameter should affect returned values
+# BUG: API ignores the requested traffic stats unit.
+TC37 Traffic stats unit parameter should affect returned values
     [Documentation]    SPEC-002 — ?unit=kbps ignored; target_bps stays in bps (1000000 not 1000).
     [Tags]    bug
     Attach UE-1
@@ -231,19 +225,21 @@ TC38 Traffic stats unit parameter should affect returned values
     Get Bearer Transfer Stats For UE-1 Bearer-9 With Unit-kbps
     Should Be Equal As Integers  ${BEARER_TRANSFER_STATS}[target_bps]  ${1000}
 
-TC39 Start traffic twice on same bearer fails
+TC38 Start traffic twice on same bearer fails
     [Documentation]    Second start returns Traffic already running (correct behavior).
     Attach UE-1
     Start Traffic UE-1 Bearer-9 Speed-1000
     Start Traffic UE-1 Bearer-9 Should Fail With Traffic Already Running
 
-TC40 Stop traffic with no active transfer returns error
+# BUG: API reports success when stopping traffic that is not running.
+TC39 Stop traffic with no active transfer returns error
     [Documentation]    BUG-006 — idle stop returns 200 traffic_stopped.
     [Tags]    bug
     Attach UE-1
     Stop Traffic UE-1 Bearer-9 Should Fail With No Active Traffic
 
-TC41 Traffic is downlink only
+# BUG: API reports non-zero uplink traffic for a downlink-only transfer.
+TC40 Traffic is downlink only
     [Documentation]    BUG-003 — tx_bps and rx_bps both non-zero (not DL-only).
     [Tags]    bug
     Attach UE-1
@@ -251,28 +247,76 @@ TC41 Traffic is downlink only
     Get Bearer Transfer Stats For UE-1 Bearer-9
     Verify Traffic Is Downlink Only
 
-TC42 Delete bearer with active traffic rejected
+# BUG: API allows deleting a bearer while traffic is active.
+TC41 Delete bearer with active traffic rejected
     [Documentation]    BUG-007 — bearer deleted while traffic is running.
     [Tags]    bug
     Attach UE-1
     Add Bearer-1 To UE-1
     Start Traffic UE-1 Bearer-1 Speed-500
     Delete Bearer-1 From UE-1 Should Fail With Active Traffic
-TC43 Attach UE with string ID rejected
+
+# BUG: API coerces a string UE ID instead of rejecting it.
+TC42 Attach UE with string ID rejected
     [Documentation]    BUG-008 - schema says ue_id is integer, but API coerces string "1" to integer.
     [Tags]    bug
     Attach UE With Raw ID-1 Should Fail With Validation Error
 
-TC44 Add bearer with string ID rejected
+# BUG: API coerces a string bearer ID instead of rejecting it.
+TC43 Add bearer with string ID rejected
     [Documentation]    BUG-009 - schema says bearer_id is integer, but API coerces string "1" to integer.
     [Tags]    bug
     Attach UE-1
     Add Bearer With Raw ID-1 To UE-1 Should Fail With Validation Error
 
-TC45 Detach UE with active traffic rejected
+# BUG: API allows detaching a UE while traffic is active.
+TC44 Detach UE with active traffic rejected
     [Documentation]    BUG-010 - active traffic can be removed implicitly by detaching UE.
     [Tags]    bug
     Attach UE-1
     Start Traffic UE-1 Bearer-9 Speed-1000
     Verify Bearer-9 Active For UE-1
     Detach UE-1 Should Fail With Active Traffic
+
+# BUG: API coerces a boolean UE ID instead of rejecting it.
+TC45 Attach UE with boolean ID rejected
+    [Documentation]    BUG-011 - OpenAPI schema declares ue_id as integer, but API coerces true to UE 1.
+    [Tags]    bug
+    Attach UE With Boolean ID Should Fail With Validation Error
+
+
+# BUG: API coerces a boolean bearer ID instead of rejecting it.
+TC46 Add bearer with boolean ID rejected
+    [Documentation]    BUG-012 - OpenAPI schema declares bearer_id as integer, but API coerces true to bearer 1.
+    [Tags]    bug
+    Attach UE-1
+    Add Bearer With Boolean ID To UE-1 Should Fail With Validation Error
+
+
+# BUG: API coerces string kbps values instead of rejecting them.
+TC57 Start traffic with string kbps rejected
+    [Documentation]    BUG-016 - OpenAPI schema declares kbps as number, but API coerces string "1000".
+    [Tags]    bug
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 With Raw Kbps-1000 Should Fail With Validation Error
+
+
+# BUG: API keeps traffic stats available after deleting the bearer.
+TC48 Deleting bearer should stop its traffic stats from being available
+    [Documentation]    BUG from attached suite - traffic stats remain available after bearer deletion.
+    [Tags]    bug
+    Attach UE-1
+    Add Bearer-1 To UE-1
+    Start Traffic UE-1 Bearer-1 Speed-10
+    Delete Bearer-1 From UE-1
+    Get Traffic Stats UE-1 Bearer-1 Should Fail With Bearer Not Found
+
+
+# BUG: API reports success when stopping the same traffic twice.
+TC49 Stop traffic twice should fail second time
+    [Documentation]    BUG from attached suite - second stop should fail when traffic is no longer running.
+    [Tags]    bug
+    Attach UE-1
+    Start Traffic UE-1 Bearer-9 Speed-10
+    Stop Traffic UE-1 Bearer-9
+    Stop Traffic Should Fail With Traffic Not Running    1    9

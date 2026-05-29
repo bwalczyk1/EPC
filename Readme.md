@@ -5,8 +5,12 @@
 mkdir .venv
 python3 -m venv .venv
 
-# For MacOS
+# For macOS using zsh
 . .venv/bin/activate
+
+# For macOS using fish
+. .venv/bin/activate.fish
+
 # For Windows
 . .venv/Scripts/activate
 
@@ -24,5 +28,3 @@ robot --outputdir results --exclude bug tests/epc_smoke.robot
 # Pełny audyt — w tym testy z tagiem bug (część testów padnie do naprawy backendu):
 robot --outputdir results tests/epc_smoke.robot
 ```
-
-Znane błędy serwisu i kroki reprodukcji: [docs/epc_simulator_bugs.md](docs/epc_simulator_bugs.md).

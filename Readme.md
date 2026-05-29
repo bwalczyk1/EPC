@@ -1,4 +1,4 @@
-# TESTOWANIE OPROGRAMOWANIA
+# EPC Simulator Testing
 
 ## Setup
 ```commandline
